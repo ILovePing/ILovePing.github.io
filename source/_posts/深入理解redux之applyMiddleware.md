@@ -1,5 +1,5 @@
 ---
-title: 深入理解redux中间件（一）
+title: 深入理解redux之applyMiddleware
 date: 2017-08-22 16:25:36
 tags:
 categories:
