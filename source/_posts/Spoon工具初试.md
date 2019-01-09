@@ -1,4 +1,4 @@
-title: 【一月挖坑，五月填】Spoon工具初试
+title: Spoon工具初试
 date: 2016-01-13 11:08:11
 categories: 技术
 tags: [kettle,spoon]
@@ -13,6 +13,3 @@ Spoon、Pan、Chef、Kitchen。
 > Kitchen—工作(job)执行器 (命令行方式)
 > Spoon—转换(transform)设计工具 (GUI方式)
 > Span—转换(transform)执行器 (命令行方式)
-
-
-
