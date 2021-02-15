@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="Hexo, NexT">
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2">
+
+
+
+
+
+
+<meta name="description" content="一个普通的redux中间件:用了ES6箭头函数和对象解构写法：123456export default function callTraceMiddleware (&amp;#123;dispatch,getState&amp;#125;)&amp;#123;    return next=&amp;gt; action =&amp;gt;&amp;#123;        console.trace();        return next">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深入理解redux之applyMiddleware">
+<meta property="og:url" content="http://yoursite.com/2017/08/22/深入理解redux之applyMiddleware/index.html">
+<meta property="og:site_name" content="Bbb&#39;s NoteBook">
+<meta property="og:description" content="一个普通的redux中间件:用了ES6箭头函数和对象解构写法：123456export default function callTraceMiddleware (&amp;#123;dispatch,getState&amp;#125;)&amp;#123;    return next=&amp;gt; action =&amp;gt;&amp;#123;        console.trace();        return next">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-02-14T13:09:56.779Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="深入理解redux之applyMiddleware">
+<meta name="twitter:description" content="一个普通的redux中间件:用了ES6箭头函数和对象解构写法：123456export default function callTraceMiddleware (&amp;#123;dispatch,getState&amp;#125;)&amp;#123;    return next=&amp;gt; action =&amp;gt;&amp;#123;        console.trace();        return next">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/08/22/深入理解redux之applyMiddleware/">
+
+
+
+
+
+  <title>深入理解redux之applyMiddleware | Bbb's NoteBook</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Bbb's NoteBook</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">cherrish everytime</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/22/深入理解redux之applyMiddleware/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="陈正荣">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Bbb's NoteBook">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">深入理解redux之applyMiddleware</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-22T16:25:36+08:00">
+                2017-08-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="一个普通的redux中间件"><a href="#一个普通的redux中间件" class="headerlink" title="一个普通的redux中间件:"></a>一个普通的redux中间件:</h3><p>用了ES6箭头函数和对象解构写法：<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="builtin-name">export</span><span class="built_in"> default </span>function callTraceMiddleware (&#123;dispatch,getState&#125;)&#123;</span><br><span class="line">    return <span class="attribute">next</span>=&gt; action =&gt;&#123;</span><br><span class="line">        console.trace();</span><br><span class="line">        return next(action);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>等价于ES5写法：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">exports.default = callTraceMiddleware;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">callTraceMiddleware</span>(<span class="params">_ref</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> dispatch = _ref.dispatch,</span><br><span class="line">        getState = _ref.getState;</span><br><span class="line"><span class="comment">//注意这里嵌套return,函数curry化，本质上就是为了将中间件串联起来执行</span></span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> (<span class="params">next</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> (<span class="params">action</span>) </span>&#123;</span><br><span class="line">            <span class="built_in">console</span>.trace();</span><br><span class="line">            <span class="keyword">return</span> next(action);</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="applyMiddleware使用redux中间件来加强createStore函数："><a href="#applyMiddleware使用redux中间件来加强createStore函数：" class="headerlink" title="applyMiddleware使用redux中间件来加强createStore函数："></a>applyMiddleware使用redux中间件来加强createStore函数：</h3><figure class="highlight lisp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">createStore(</span><br><span class="line">	reducer,</span><br><span class="line">	initialState,</span><br><span class="line">	applyMiddleware(</span><br><span class="line">		thunkMiddleware,//常用的异步使用action中间件</span><br><span class="line">		callTraceMiddleware//使用自定义的打印调用栈中间件</span><br><span class="line">	)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<h3 id="applyMiddleware实现原理："><a href="#applyMiddleware实现原理：" class="headerlink" title="applyMiddleware实现原理："></a>applyMiddleware实现原理：</h3><p>以下是applyMiddleware.js的源码<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> compose <span class="keyword">from</span> <span class="string">'./compose'</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="function"><span class="keyword">function</span> <span class="title">applyMiddleware</span>(<span class="params">...middlewares</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="function">(<span class="params">createStore</span>) =&gt;</span> <span class="function">(<span class="params">reducer, preloadedState, enhancer</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> store = createStore(reducer, preloadedState, enhancer)</span><br><span class="line">    <span class="keyword">var</span> dispatch = store.dispatch</span><br><span class="line">    <span class="keyword">var</span> chain = []</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> middlewareAPI = &#123;</span><br><span class="line">      getState: store.getState,</span><br><span class="line">      dispatch: <span class="function">(<span class="params">action</span>) =&gt;</span> dispatch(action)</span><br><span class="line">    &#125;</span><br><span class="line">    chain = middlewares.map(<span class="function"><span class="params">middleware</span> =&gt;</span> middleware(middlewareAPI))</span><br><span class="line">    dispatch = compose(...chain)(store.dispatch)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">      ...store,</span><br><span class="line">      dispatch</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>1.applyMiddleware返回了一个匿名闭包函数，在该闭包内使用<code>createStore(reducer, preloadedState, enhancer)</code>创建了store。<br>这样在无数个中间件形成的嵌套函数中共享一个store对象。<br>2.middlewares数组（我们这里为[thunkMiddleware,callTraceMiddleware]）遍历生成新的中间件函数对象数组，每个中间件函数传入middlewareAPI。<br>根据文章开篇的中间件代码可知此时的chain数组里的每个函数对象其实就是入参为next的匿名函数。<br>3.compose方法将chain数组和原生的store.dispatch结合，生成了一个通过一条条都是中间件的流水线加工好的吊吊的新dispatch方法。<br>4.物是人非，至此return给我们的是闭包共享的store对象和一个装备精良的dispatch方法。</p>
+<h3 id="我们看到在使用middlewares加工store-dispatch时用到了compose函数，以下是compose的源码设计："><a href="#我们看到在使用middlewares加工store-dispatch时用到了compose函数，以下是compose的源码设计：" class="headerlink" title="我们看到在使用middlewares加工store.dispatch时用到了compose函数，以下是compose的源码设计："></a>我们看到在使用middlewares加工store.dispatch时用到了compose函数，以下是compose的源码设计：</h3><figure class="highlight actionscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">export <span class="keyword">default</span> <span class="function"><span class="keyword">function</span> <span class="title">compose</span><span class="params">(<span class="rest_arg">...funcs</span>)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (funcs.length === <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> arg =&gt; arg</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (funcs.length === <span class="number">1</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> funcs[<span class="number">0</span>]</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> last = funcs[funcs.length - <span class="number">1</span>]</span><br><span class="line">  <span class="keyword">const</span> rest = funcs.slice(<span class="number">0</span>, <span class="number">-1</span>)</span><br><span class="line">  <span class="keyword">return</span> (...args) =&gt; rest.reduceRight((composed, f) =&gt; f(composed), last(...args))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到compose里关键的地方就是调用了<code>Array.prototype.reduceRight</code>方法。该方法功能就是从右向左执行的reduce函数，详细自行google。<br><figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"><span class="markdown">/**</span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="bullet"> * </span>1. initalValue： lastMiddleware(store.dispatch)</span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="bullet"> * </span>2. previousValue: composed</span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="bullet"> * </span>3. currentValue: currentMiddleware</span></span></span><br><span class="line"><span class="comment"><span class="markdown"><span class="bullet"> * </span>4. return value: currentMiddleware(composed) =&gt; newComposed</span></span></span><br><span class="line"><span class="comment"><span class="markdown"> */</span></span></span><br><span class="line">rest.reduceRight((composed, f) =&gt; f(composed), last(...args))</span><br></pre></td></tr></table></figure></p>
+<h3 id="执行过程分析："><a href="#执行过程分析：" class="headerlink" title="执行过程分析："></a>执行过程分析：</h3><p>当前传入中间件为[thunkMiddleware,callTraceMiddleware]。<br>1.chain = middlewares.map(middleware =&gt; middleware(middlewareAPI))<br>上文提到，经过map转换后每一个middleware就变成了<br><figure class="highlight nimrod"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">function (next) &#123;</span><br><span class="line">    <span class="keyword">return</span> function (action) <span class="meta">&#123;...&#125;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>2.compose(…chain)(store.dispatch)</p>
+<p>a. 初始阶段<br><strong>initValue</strong>：composed = callTraceMiddleware(store.dispatch) = function (action) {console.trace();return next(action);}<br><strong>next</strong>: store.dispatch(原生dispatch方法)<br>b. 执行一次<br><strong>currentValue</strong>：thunkMiddleware<br><strong>returnValue</strong>: thunkMiddleware(composed) = thunkMiddleware(callTraceMiddleware(store.dispatch))<br><strong>next</strong>: composed = initValue = callTraceMiddleware(store.dispatch)</p>
+<p>所以最后compose执行就是<br>dispatch = thunkMiddleware(callTraceMiddleware(store.dispatch))<br>等价于</p>
+<ol>
+<li>先执行thunkMiddleware里的逻辑代码，此时next指代为callTraceMiddleware(store.dispatch)</li>
+<li>执行callTraceMiddleware,此时next指代为store.dispatch,next(action)等于执行store.dispatch(action)</li>
+<li>store.dispatch 会执行 reducer 生成最新的 store 数据</li>
+<li>所有next执行完之后return回溯</li>
+<li>执行callTraceMiddleware中next后的代码</li>
+<li>执行thunkMiddleware中next后的代码<br>总结整个流程就是<br><code>thunkMiddleware-&gt;callTraceMiddleware-&gt;dispatch-&gt;callTraceMiddleware-&gt;thunkMiddleware</code><br>因此整个过程就跟洋葱圈一样从外到里，再从里回溯到外。</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/11/29/html5新标签兼容IE6-7-8/" rel="next" title="html5新标签兼容IE6/7/8">
+                <i class="fa fa-chevron-left"></i> html5新标签兼容IE6/7/8
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/06/13/谈谈web身份验证机制/" rel="prev" title="理解常见的几种web身份验证类型">
+                理解常见的几种web身份验证类型 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/uploads/avatar.jpg" alt="陈正荣">
+          <p class="site-author-name" itemprop="name">陈正荣</p>
+           
+              <p class="site-description motion-element" itemprop="description">陈正荣的博客</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/ILovePing" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                    
+                      GitHub
+                    
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#一个普通的redux中间件"><span class="nav-number">1.</span> <span class="nav-text">一个普通的redux中间件:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#applyMiddleware使用redux中间件来加强createStore函数："><span class="nav-number">2.</span> <span class="nav-text">applyMiddleware使用redux中间件来加强createStore函数：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#applyMiddleware实现原理："><span class="nav-number">3.</span> <span class="nav-text">applyMiddleware实现原理：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#我们看到在使用middlewares加工store-dispatch时用到了compose函数，以下是compose的源码设计："><span class="nav-number">4.</span> <span class="nav-text">我们看到在使用middlewares加工store.dispatch时用到了compose函数，以下是compose的源码设计：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#执行过程分析："><span class="nav-number">5.</span> <span class="nav-text">执行过程分析：</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">陈正荣</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Gemini
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

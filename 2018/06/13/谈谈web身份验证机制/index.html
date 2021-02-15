@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="http,authentication,">
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2">
+
+
+
+
+
+
+<meta name="description" content="最近尝试使用egg-passport-passport接入github登陆，发觉对于OAuth验证的流程不是很清晰，遂整理了一波，顺便了解了下web身份验证的常见技术方案。  ####前提概念  Http是无状态的，因此也快速。每次请求都是无关联的。  Https就是在Http协议上加上一层ssl/tls加密，也是stateless的）。  cookie是有状态的，它是存在用户浏览器里的一小坨数据">
+<meta name="keywords" content="http,authentication">
+<meta property="og:type" content="article">
+<meta property="og:title" content="理解常见的几种web身份验证类型">
+<meta property="og:url" content="http://yoursite.com/2018/06/13/谈谈web身份验证机制/index.html">
+<meta property="og:site_name" content="Bbb&#39;s NoteBook">
+<meta property="og:description" content="最近尝试使用egg-passport-passport接入github登陆，发觉对于OAuth验证的流程不是很清晰，遂整理了一波，顺便了解了下web身份验证的常见技术方案。  ####前提概念  Http是无状态的，因此也快速。每次请求都是无关联的。  Https就是在Http协议上加上一层ssl/tls加密，也是stateless的）。  cookie是有状态的，它是存在用户浏览器里的一小坨数据">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-02-14T13:09:56.779Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="理解常见的几种web身份验证类型">
+<meta name="twitter:description" content="最近尝试使用egg-passport-passport接入github登陆，发觉对于OAuth验证的流程不是很清晰，遂整理了一波，顺便了解了下web身份验证的常见技术方案。  ####前提概念  Http是无状态的，因此也快速。每次请求都是无关联的。  Https就是在Http协议上加上一层ssl/tls加密，也是stateless的）。  cookie是有状态的，它是存在用户浏览器里的一小坨数据">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/06/13/谈谈web身份验证机制/">
+
+
+
+
+
+  <title>理解常见的几种web身份验证类型 | Bbb's NoteBook</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Bbb's NoteBook</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">cherrish everytime</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/06/13/谈谈web身份验证机制/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="陈正荣">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Bbb's NoteBook">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">理解常见的几种web身份验证类型</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-13T11:08:11+08:00">
+                2018-06-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近尝试使用egg-passport-passport接入github登陆，发觉对于OAuth验证的流程不是很清晰，遂整理了一波，顺便了解了下web身份验证的常见技术方案。</p>
+<hr>
+<p>####前提概念</p>
+<ul>
+<li><p>Http是无状态的，因此也快速。每次请求都是无关联的。</p>
+</li>
+<li><p>Https就是在Http协议上加上一层ssl/tls加密，也是stateless的）。</p>
+</li>
+<li><p>cookie是有状态的，它是存在用户浏览器里的一小坨数据，有一定的失效时间，每次请求会自动带到请求头Cookie字段中。cookie分为内存cookie和硬盘cookie，内存cookie又称为进程cookie，当关闭浏览器即进程关闭cookie就会失效，硬盘cookie则不会。</p>
+</li>
+<li><p>Session是在服务端保存的一个数据结构，用来跟踪用户的状态，这个数据可以保存在集群（memcached、redis）、数据库、文件中，作为唯一的标识，用来标记对应的用户，已解决每次请求都是无状态的问题。</p>
+</li>
+</ul>
+<hr>
+<p>####常见web身份验证机制<br><strong>HTTP Basic Authentication</strong></p>
+<p>http基本身份认证，基本流程如下：</p>
+<ol>
+<li>客户端访问一个需要身份认证的页面。</li>
+<li>服务端响应401（Unauthorized）,并在WWW-Authenticate头部提供如何验证的信息。</li>
+<li>如果客户端有意向要验证自己的身份，就在新的请求头部Authorization中添加「用户凭证」。</li>
+</ol>
+<blockquote>
+<p>那么这个用户凭证是怎么生成的呢，公式是<em>base64encode(username+”:”+password)</em>。举个例子，比如输入的用户名是admin，口令密码123456，明文就是”admin:123456”，使用base64加密就是”YWRtaW46MTIzNDU2”。</p>
+</blockquote>
+<p>当然base64是可逆的，在基本身份认证过程中使用base64并不是为了安全与隐私，而是为将用户名和口令中的不兼容的字符转换为均与HTTP协议兼容的字符集。</p>
+<p>优点：非常容易实现，基本所有的浏览器都支持该机制。</p>
+<p>缺点：</p>
+<ul>
+<li>没使用https的话密钥很容易被拦截解码，基本等同于在公共场合脱光了在聊天，因此后来有了一种http摘要认证（使用随机数md5加密），这里不赘述。</li>
+<li>除了关闭浏览器，用户没有主动登出的手段。</li>
+<li>相较于session认证，因为每次请求头都要有凭证在,所以数据量会大一点。</li>
+</ul>
+<p><strong>Session Based Authentication</strong></p>
+<p>session身份认证这个应该所有人都接触过。session一般使用cookie实现，基本流程如下：</p>
+<ol>
+<li>第一次用户输入账号密码，http发起请求到服务器。</li>
+<li>服务器会生成一个session_id，并将会话保存在数据库/服务器文件/集群上。</li>
+<li>然后在响应头把session_id添加到set-Cookie字段里，告诉浏览器把session_id添加到cookie里。</li>
+<li>下一次请求发起时，服务器会先去读取请求头Cookie里的session_id存不存在，如果存在那么服务器就会根据session_id去查找存放到session数据/文件，就能识别是哪一个用户了。</li>
+<li>如果用户注销，需要发起销毁当前session的请求，服务端销毁session。</li>
+</ol>
+<p>优点：</p>
+<ul>
+<li>身份信息不透明。</li>
+<li>会话持久化在后台。</li>
+<li>可以随时销毁当前会话。</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>访问量大，服务器压力相对较大。</li>
+<li>用户信息可能会丢失。</li>
+<li>因为session的实现是依附于浏览器cookie的，所以一旦被人拿到cookie，可能会造成csrf攻击。</li>
+</ul>
+<p><strong>Token Based Authentication</strong></p>
+<p>token令牌验证，随着RESTful API和微服务流行。基本流程如下：</p>
+<ol>
+<li>用户输入账号密码，发起登录请求。</li>
+<li>服务器校验账号密码后，通过一定规则生成token令牌返回给客户端。</li>
+<li>客户端保存token到本地存储介质（localStorage、sessionStorage、cookie等）。</li>
+<li>客户端发起下次请求时把token带到请求头。</li>
+<li>服务端接收到token，解码，如果有效，接受请求。</li>
+<li>如果用户注销，客户端销毁本地令牌。</li>
+</ol>
+<p>可以看出，与session类似，不同的在于session是有状态的，保持在服务端，并通过cookie把会话id保存在客户端；而token是无状态的，只保存在客户端。</p>
+<p>优点：</p>
+<ul>
+<li>无状态，易于扩展，多设备无障碍。</li>
+<li>比较安全<br>缺点：</li>
+<li>token相较于session_id要长，每次请求头字节更多。</li>
+</ul>
+<p><strong>JWT</strong></p>
+<p>jwt = json web token，就是一种基于token的认证形式。基于web标准，是一种自包含的数据格式，主要有payload和signature。目前有成熟的三方库实现了jwt编码和解码，这里不赘述了。</p>
+<p><strong>OAuth</strong></p>
+<p>OAuth是一种认证协议，有OAuth 1.0，OAuth 1.0a和OAuth 2.0几个版本。常见的网站使用第三方（比如github，微信，qq）登录都属于OAuth认证。<br>它允许用户通过授权的形式允许第三方应用能访问OAuth服务器上存储的私密资源，而不用将账户密码提供给第三方应用。这么讲挺绕口的，我写起来也绕口，下面简述一下基本流程：</p>
+<ol>
+<li>用户打开第三方应用选择使用github登录。</li>
+<li>页面导向github授权页面，如果没登录github则是输入github账号密码的页面。</li>
+<li>用户输入密码后，github会提示是否允许使用github账户登录第三方应用。</li>
+<li>用户允许后，OAuth服务会重定向回配置好的第三方应用地址。</li>
+<li>这时候该用户在github上的token令牌就发送给了客户端，客户端可以通过token获取用户在github服务器上的资源。</li>
+</ol>
+<p>说实话一开始接触这个我也觉得挺绕的，这里有一个形象生动的<a href="http://stackoverflow.com/a/32534239" target="_blank" rel="noopener">例子</a>描述了这一过程。英文比较长，简单翻译一下故事情节：</p>
+<p>市民小刚想去买土豪李蛋开的甜品店里的甜甜圈，准备使用自己的RMB付钱的时候，李蛋告诉小刚店里只支持银行卡支付，一个甜甜圈要10块钱。小刚贪吃，不嫌麻烦，告诉李蛋那就用自己的工行卡支付，李蛋就在一张纸上写上「李蛋甜品店」，让小刚拿着这张纸去工行。小刚照做（跳转到授权页面），工行柜员小颜看到这张纸上的信息后，要小刚在柜台上提供银行卡号（账号），输入密码（密码），以及要向李蛋支付多少钱，小刚要买10个，确认支付100RMB，柜员小颜这时候在一张白纸上写了一串没人看得懂的火星文（加密的token），告诉小刚确定要付钱给李蛋的话就把这个火星文给李蛋，小刚照做（重定向）。李蛋拿到小明给的火星文后，让小明等一下，自己跑去工行通过火星文获得了小明账户上的100块钱（获取用户授权OAuth服务器上的私密资源），小刚心满意足的拿到10个甜甜圈开始吃了起来。<br>故事并没有结束，之后的每天下班后小刚都去李蛋店里买10个甜甜圈，这次就不用再亲自去银行跑一趟了（已经授权过，没有失效），只要等李蛋去工行取100块钱，就可以直接吃了。</p>
+<p>这里我们能明显看出OAuth的一个隐患就是第三方应用如果有token的话随时都可以获取授权资源。</p>
+<p>当然优点也显而易见：第三方应用无需获取客户的账号密码就可以获取到用户在OAuth服务器上的资源。</p>
+<p><strong>OpenId</strong></p>
+<p>维基百科上对OpenId的解释如下：</p>
+<blockquote>
+<p>OpenID是一个去中心化的网上身份认证系统。对于支持OpenID的网站，用户不需要记住像用户名和密码这样的传统验证标记。取而代之的是，他们只需要预先在一个作为OpenID身份提供者（identity provider, IdP）的网站上注册。OpenID是去中心化的，任何网站都可以使用OpenID来作为用户登录的一种方式，任何网站也都可以作为OpenID身份提供者。OpenID既解决了问题而又不需要依赖于中心性的网站来确认数字身份。</p>
+</blockquote>
+<p>OpenId的一般登录流程如下：<br>用户A在提供OpenId服务的网站上注册一个openId，接着用户A访问B网站只需要输入这个openId而无需输入账号密码就可以登录。</p>
+<p>OpenId的适用场景就是在登录多个网站可以共用一个统一的账户密码,不用换个网站就要重新登录，而OAuth的适用场景就是你在A网站的信息想在B网站使用，然而你不想提供账号密码。<br>但是两者并不是隔离的，两者可以混用。</p>
+<p>以上是常用的几种web验证机制，了解了这些之后我开始重新投入egg-passport-github如何实现OAuth验证。且看下文。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/http/" rel="tag"># http</a>
+          
+            <a href="/tags/authentication/" rel="tag"># authentication</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/08/22/深入理解redux之applyMiddleware/" rel="next" title="深入理解redux之applyMiddleware">
+                <i class="fa fa-chevron-left"></i> 深入理解redux之applyMiddleware
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/06/13/egg-passport剖析/" rel="prev" title="egg的passport实现探究">
+                egg的passport实现探究 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/uploads/avatar.jpg" alt="陈正荣">
+          <p class="site-author-name" itemprop="name">陈正荣</p>
+           
+              <p class="site-description motion-element" itemprop="description">陈正荣的博客</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/ILovePing" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                    
+                      GitHub
+                    
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">陈正荣</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Gemini
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

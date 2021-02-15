@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="Hexo, NexT">
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2">
+
+
+
+
+
+
+<meta name="description" content="提高首屏渲染速度  Tree shake -&amp;gt; remove unused code  Code split(webpack import / require.ensure) -&amp;gt; load critical code  Script 使用async/defer防止脚本加载会阻塞 dom 渲染（async/defer 异同点，两者都是异步加载，async 是乱序的加载好就马上执行，de">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用chromeDevTools Audits 优化web应用实践总结">
+<meta property="og:url" content="http://yoursite.com/2021/02/14/使用chromeDevTools-Audits-优化web应用实践总结/index.html">
+<meta property="og:site_name" content="Bbb&#39;s NoteBook">
+<meta property="og:description" content="提高首屏渲染速度  Tree shake -&amp;gt; remove unused code  Code split(webpack import / require.ensure) -&amp;gt; load critical code  Script 使用async/defer防止脚本加载会阻塞 dom 渲染（async/defer 异同点，两者都是异步加载，async 是乱序的加载好就马上执行，de">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://user-images.githubusercontent.com/13430709/62349670-01394200-b533-11e9-9899-b3f9ac5b5c3a.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/13430709/62349681-07c7b980-b533-11e9-96d1-b748e7c0edec.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/13430709/62349882-93414a80-b533-11e9-8c0e-17ece1bec786.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/13430709/62349945-c7b50680-b533-11e9-9aa2-0e96d378b8ac.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/13430709/62350083-33976f00-b534-11e9-854c-4c6d002afeb1.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/13430709/62350090-3d20d700-b534-11e9-8716-c6de5a1b5d61.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/13430709/62350152-6e010c00-b534-11e9-9498-f5ad8fa2d212.png">
+<meta property="og:updated_time" content="2021-02-15T07:18:17.527Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用chromeDevTools Audits 优化web应用实践总结">
+<meta name="twitter:description" content="提高首屏渲染速度  Tree shake -&amp;gt; remove unused code  Code split(webpack import / require.ensure) -&amp;gt; load critical code  Script 使用async/defer防止脚本加载会阻塞 dom 渲染（async/defer 异同点，两者都是异步加载，async 是乱序的加载好就马上执行，de">
+<meta name="twitter:image" content="https://user-images.githubusercontent.com/13430709/62349670-01394200-b533-11e9-9899-b3f9ac5b5c3a.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2021/02/14/使用chromeDevTools-Audits-优化web应用实践总结/">
+
+
+
+
+
+  <title>使用chromeDevTools Audits 优化web应用实践总结 | Bbb's NoteBook</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Bbb's NoteBook</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">cherrish everytime</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/02/14/使用chromeDevTools-Audits-优化web应用实践总结/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="陈正荣">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Bbb's NoteBook">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">使用chromeDevTools Audits 优化web应用实践总结</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-02-14T21:17:02+08:00">
+                2021-02-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>提高首屏渲染速度</p>
+<ol>
+<li><p>Tree shake -&gt; remove unused code</p>
+</li>
+<li><p>Code split(webpack <code>import</code> / <code>require.ensure</code>) -&gt; load critical code</p>
+</li>
+<li><p>Script 使用<code>async</code>/<code>defer</code>防止脚本加载会阻塞 dom 渲染（async/defer 异同点，两者都是异步加载，async 是乱序的加载好就马上执行，defer 加载好之后在 html 解析之后按顺序执行，具体见下图）<br>例子：<code>jquery.js</code>可以使用 async 加载，因为它不依赖其他 js，而<code>$(“#id1”).hide()</code>这种依赖 jquery 的 js 应该使用 defer 在 html parse 完成之后加载执行。<br><img src="https://user-images.githubusercontent.com/13430709/62349670-01394200-b533-11e9-9899-b3f9ac5b5c3a.png" alt="484D2E9E-00C9-4C03-B179-3DBB6C5F8A60"><br><img src="https://user-images.githubusercontent.com/13430709/62349681-07c7b980-b533-11e9-96d1-b748e7c0edec.png" alt="CE2D2F28-F6C5-4520-AD5A-C03FEFD3CE4C"><br><code>preload</code>和<code>prefetch</code>这两个是预加载资源到 Http 缓存中，相当于上图里 script fetch 这一步，仔细别搞混淆。</p>
+</li>
+</ol>
+<blockquote>
+<p>我们可以明确 DOMContentLoaded 所计算的时间，当文档中没有脚本时，浏览器解析完文档便能触发 DOMContentLoaded 事件；如果文档中包含脚本，则脚本会阻塞文档的解析，而脚本需要等位于脚本前面的 css 加载完才能执行。在任何情况下，DOMContentLoaded 的触发不需要等待图片等其他资源加载完成。</p>
+</blockquote>
+<ol start="4">
+<li><p>Optimize encoding and transfer size of text-based assets: enable text compression，nginx 静态资源开启 gzip，服务端接口返回数据使用<code>gzip</code>或<code>brotli</code>(Brotli 压缩比优于 gzip)等压缩 response 正文。<br>可通过 Network 里查看请求响应头里的<code>content-encoding</code>有没有<code>gzip/deflate/br</code>字段，和压缩前后 size 大小比较：<br><img src="https://user-images.githubusercontent.com/13430709/62349882-93414a80-b533-11e9-8c0e-17ece1bec786.png" alt="525E22B0-A478-43D0-92C1-0956B7BAB780"></p>
+<pre><code>![BB43FCD4-CC5A-4903-8580-B01E6C8990F7](https://user-images.githubusercontent.com/13430709/62349829-7a389980-b533-11e9-8c43-ad8acd8682ac.png)
+</code></pre></li>
+</ol>
+<p>5.Defer critical css ,页面只适合被关键 css（这种关键 css 适合 inline 到 html 里面，减少资源请求的时间）加载阻塞，其他与当前页面展示无关的 css 适合使用 defer 放在。<br>在 Coverage 里可以看到哪些是 critical 资源：<br><img src="https://user-images.githubusercontent.com/13430709/62349945-c7b50680-b533-11e9-9aa2-0e96d378b8ac.png" alt="5DC8DFFC-D660-4A8A-838F-FDBCE2D5DBAD"></p>
+<ol start="6">
+<li><p>尽量保持主线程空闲，不要长时间阻塞，能及时处理用户输入。</p>
+</li>
+<li><p>使用服务线程缓存资源，进行计算等，a.防止主线程长时间占用，b.以 httpCache 能力为基准作渐进式增强资源预缓存能力，理想状态无 http 请求往返。<br>使用<code>workbox-webpack-plugin</code> -&gt; use service work to generate thread to load resourses cached. （发布到线上要用 https），具体代码如下：<br><img src="https://user-images.githubusercontent.com/13430709/62350083-33976f00-b534-11e9-854c-4c6d002afeb1.png" alt="image"><br><img src="https://user-images.githubusercontent.com/13430709/62350090-3d20d700-b534-11e9-8716-c6de5a1b5d61.png" alt="image"></p>
+</li>
+<li><p>减少 redirect 次数，降低多次的 http 往返开销</p>
+</li>
+<li><p>用户不可见图片不用提前加载；使用适当图片格式，svg 格式是一种挺好的尝试，可以任意 resize 而且 svgcode 作为 text 可以 compress 和 minify；图片使用工具适当压缩；使用多个大小、格式版本的图片资源适配不同场景（<picture> srcset mediaQuery）</picture></p>
+</li>
+<li><p>图片格式还可以使用最新的 webp，jpeg 2000，jpeg XR，就当作是渐进式增强咯。</p>
+</li>
+<li><p>TTI -&gt; time to interactive 减少页面加载到可以交互处理用户输入事件的时间长度，防止阻塞页面渲染主要还是防止首屏加载非必要资源，预加载和最小化（压缩混淆）必要资源，预缓存 assets，懒加载其他（未来的）navigation。</p>
+</li>
+<li><p>运用 Http Cache 的能力。<br><img src="https://user-images.githubusercontent.com/13430709/62350152-6e010c00-b534-11e9-9498-f5ad8fa2d212.png" alt="image"></p>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/03/25/http-header缓存/" rel="next" title="http-header缓存">
+                <i class="fa fa-chevron-left"></i> http-header缓存
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/02/14/隐水印组件/" rel="prev" title="隐水印组件">
+                隐水印组件 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/uploads/avatar.jpg" alt="陈正荣">
+          <p class="site-author-name" itemprop="name">陈正荣</p>
+           
+              <p class="site-description motion-element" itemprop="description">陈正荣的博客</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/ILovePing" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                    
+                      GitHub
+                    
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">陈正荣</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Gemini
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

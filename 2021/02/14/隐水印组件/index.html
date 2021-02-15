@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="Hexo, NexT">
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2">
+
+
+
+
+
+
+<meta name="description" content="业务上沉淀的水印组件。  组件仓库地址：https://github.com/ILovePing/invisible-watermark  组件设计  水印种类  背景图a. dom 直接插入，平铺在页面 body 上。b. canvas 绘制，导出为 base64 或者 blob 作为元素的 background-image。c. svg 绘制，通过 svg 的 text 元素绘制，最终也是和">
+<meta property="og:type" content="article">
+<meta property="og:title" content="隐水印组件">
+<meta property="og:url" content="http://yoursite.com/2021/02/14/隐水印组件/index.html">
+<meta property="og:site_name" content="Bbb&#39;s NoteBook">
+<meta property="og:description" content="业务上沉淀的水印组件。  组件仓库地址：https://github.com/ILovePing/invisible-watermark  组件设计  水印种类  背景图a. dom 直接插入，平铺在页面 body 上。b. canvas 绘制，导出为 base64 或者 blob 作为元素的 background-image。c. svg 绘制，通过 svg 的 text 元素绘制，最终也是和">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://user-images.githubusercontent.com/13430709/94658082-ef208280-0334-11eb-8878-2d20fe5497cc.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/13430709/62448019-4ced2500-b799-11e9-9aa4-0f26145027ac.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/13430709/62448978-aa827100-b79b-11e9-9b1e-34efab1c5d69.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/13430709/62448346-2b406d80-b79a-11e9-95d4-80c5d9d5c7b9.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/13430709/62448516-9f7b1100-b79a-11e9-85bb-80b1b3ad2a87.png">
+<meta property="og:updated_time" content="2021-02-15T07:18:00.778Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="隐水印组件">
+<meta name="twitter:description" content="业务上沉淀的水印组件。  组件仓库地址：https://github.com/ILovePing/invisible-watermark  组件设计  水印种类  背景图a. dom 直接插入，平铺在页面 body 上。b. canvas 绘制，导出为 base64 或者 blob 作为元素的 background-image。c. svg 绘制，通过 svg 的 text 元素绘制，最终也是和">
+<meta name="twitter:image" content="https://user-images.githubusercontent.com/13430709/94658082-ef208280-0334-11eb-8878-2d20fe5497cc.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2021/02/14/隐水印组件/">
+
+
+
+
+
+  <title>隐水印组件 | Bbb's NoteBook</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Bbb's NoteBook</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">cherrish everytime</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/02/14/隐水印组件/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="陈正荣">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Bbb's NoteBook">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">隐水印组件</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-02-14T21:20:45+08:00">
+                2021-02-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>业务上沉淀的水印组件。</p>
+<ol>
+<li><p>组件仓库地址：<code>https://github.com/ILovePing/invisible-watermark</code></p>
+</li>
+<li><p>组件设计<br><img src="https://user-images.githubusercontent.com/13430709/94658082-ef208280-0334-11eb-8878-2d20fe5497cc.png" alt="image"></p>
+</li>
+<li><p>水印种类</p>
+<ol>
+<li><p>背景图<br>a. dom 直接插入，平铺在页面 body 上。<br>b. canvas 绘制，导出为 base64 或者 blob 作为元素的 background-image。<br>c. svg 绘制，通过 svg 的 text 元素绘制，最终也是和 canvas 一样转化成 dataUrl 作为元素的背景图。</p>
+</li>
+<li><p>数字水印<br>参考第三方包实现：digital-watermarking。</p>
+</li>
+</ol>
+</li>
+<li><p>封装组件<br>将以上 canvas/svg 绘制水印图片封装成组件形式：invisible-watermark，使用文档见 git readme。</p>
+</li>
+</ol>
+<h3 id="水印攻防"><a href="#水印攻防" class="headerlink" title="水印攻防"></a><strong>水印攻防</strong></h3><ol>
+<li><p><strong>攻</strong>常见水印为可见水印，攻击者很容易能避开有水印的位置截图，或者通过控制台将 background-image 注释掉以达到去掉水印的效果。<br><img src="https://user-images.githubusercontent.com/13430709/62448019-4ced2500-b799-11e9-9aa4-0f26145027ac.png" alt="image"></p>
+</li>
+<li><p><strong>防</strong>针对全局添加额外的一层不可见的隐水印，并添加<a href="https://javascript.ruanyifeng.com/dom/mutationobserver.html" target="_blank" rel="noopener">mutationObserver</a>监听属性变更，使攻击者无法通过控制台简单的注释掉背景水印，对于泄露的数据原图，可通过 ps-&gt;色阶调整可追踪用户信息。<br><img src="https://user-images.githubusercontent.com/13430709/62448978-aa827100-b79b-11e9-9b1e-34efab1c5d69.png" alt="image"></p>
+</li>
+</ol>
+<p><img src="https://user-images.githubusercontent.com/13430709/62448346-2b406d80-b79a-11e9-95d4-80c5d9d5c7b9.png" alt="image"></p>
+<ol start="3">
+<li><p><strong>攻</strong>攻击者知晓了页面存在不可删除不可注释的水印后，可以通过控制台对存在水印的元素插入 style 覆盖样式。<br><img src="https://user-images.githubusercontent.com/13430709/62448516-9f7b1100-b79a-11e9-85bb-80b1b3ad2a87.png" alt="image"></p>
+</li>
+<li><p><strong>防</strong>得知攻击者可以通过控制台插入样式，我们尝试阻止攻击者打开控制台。<br>这时候你肯定想到了禁用右键事件，但是别忘了还有快捷键可以打开控制台，难道我们还要禁用掉对应的快捷键吗？（换个热键也能打开），明显不可能。尝试转换方向，控制台可以打开，但是有没有什么办法监听打开事件呢，我们只要能监听到，在打开控制台的时候隐藏掉重要的隐私数据那不就好啦。有如下两个方法：<br> 1. <strong>[适用于大多浏览器，受限于弹出式控制台页面]</strong>控制台打开页面会重新 resize，监听 resize 事件，但是控制台也可以在一个独立的窗口打开，pass<br> 2. <strong>[适用 Chrome 浏览器，受限于非 Chrome 浏览器]</strong>浏览器在打开控制台时会执行 console.log 输出某个对象，这时是会去 get 对象属性的 id，我们可以通过 Object.defineProperty 自定义对象属性 id 的 getter 方法来监听控制台打开。可以了解一下有第三方包专门检测控制台的打开：<a href="https://github.com/AepKill/devtools-detector" target="_blank" rel="noopener">https://github.com/AepKill/devtools-detector</a></p>
+</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">    <span class="keyword">var</span> el = <span class="keyword">new</span> Image();</span><br><span class="line">    <span class="built_in">Object</span>.defineProperty(el, <span class="string">'id'</span>, &#123;</span><br><span class="line">        <span class="keyword">get</span>: function() &#123;</span><br><span class="line">            alert(<span class="string">'控制台打开，隐藏隐私数据'</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="built_in">console</span>.log(el);</span><br><span class="line">  &lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+<ol start="5">
+<li><p><strong>攻</strong>不能从控制台插入样式，换个角度：浏览器地址栏支持 javascript 协议，只要是 javascript:开头，后续的 js 语句可以直接执行，攻击者可以通过浏览器地址栏执行 js，插入 style 样式，将所有 div 元素的背景设为 none 即可除掉水印。</p>
+</li>
+<li><p><strong>攻</strong>无法从控制台入手，攻击者还可以通过 chromium 浏览器内核模拟浏览器访问，通过插入脚本，对访问页面截图导出也可以实现隐藏水印得到数据截图的效果。</p>
+</li>
+<li><p><strong>防</strong>综上可见，道高一尺魔高一丈，浏览器上直接通过文本渲染的数据肯定是有办法“安全”的拿到的，因此<strong>终极方案就是直接使用 canvas 渲染</strong>，水印直接画在画布上，这样就无法简单的通过 js、css 求水印啦，并且对于图片音频等多媒体文件还可以加上数字水印的方式达到追踪防篡改的效果，可了解一下数字水印的实现原理：<a href="https://www.jianshu.com/p/62e52c4ab5c4" target="_blank" rel="noopener">https://www.jianshu.com/p/62e52c4ab5c4</a>以及 node 实现的 npm 包：<a href="https://github.com/zy445566/node-digital-watermarking" target="_blank" rel="noopener">digital-watermarking</a></p>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/02/14/使用chromeDevTools-Audits-优化web应用实践总结/" rel="next" title="使用chromeDevTools Audits 优化web应用实践总结">
+                <i class="fa fa-chevron-left"></i> 使用chromeDevTools Audits 优化web应用实践总结
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/02/15/JS-EventLoop/" rel="prev" title="JS EventLoop">
+                JS EventLoop <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/uploads/avatar.jpg" alt="陈正荣">
+          <p class="site-author-name" itemprop="name">陈正荣</p>
+           
+              <p class="site-description motion-element" itemprop="description">陈正荣的博客</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/ILovePing" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                    
+                      GitHub
+                    
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#水印攻防"><span class="nav-number">1.</span> <span class="nav-text">水印攻防</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">陈正荣</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Gemini
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

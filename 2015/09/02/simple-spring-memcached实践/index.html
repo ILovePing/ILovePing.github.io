@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="SSM,缓存,">
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2">
+
+
+
+
+
+
+<meta name="description" content="前段时间，让我学习一下SSM的缓存技术，在大概了解了之后我在项目里面尝试加入SSM，下面是我完成的几个步骤。 安装memcached服务器memcached的服务器网上都有的下载这里就不贴链接了，建议安装后将memcached服务设置为自动启动，同时，我的注册表MemcachedServer的ImagePath属性值设为 “D:\memcached\memcached.exe” -d runser">
+<meta name="keywords" content="SSM,缓存">
+<meta property="og:type" content="article">
+<meta property="og:title" content="simple-spring-memcached实践">
+<meta property="og:url" content="http://yoursite.com/2015/09/02/simple-spring-memcached实践/index.html">
+<meta property="og:site_name" content="Bbb&#39;s NoteBook">
+<meta property="og:description" content="前段时间，让我学习一下SSM的缓存技术，在大概了解了之后我在项目里面尝试加入SSM，下面是我完成的几个步骤。 安装memcached服务器memcached的服务器网上都有的下载这里就不贴链接了，建议安装后将memcached服务设置为自动启动，同时，我的注册表MemcachedServer的ImagePath属性值设为 “D:\memcached\memcached.exe” -d runser">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/img/SSMshijian.png">
+<meta property="og:image" content="http://yoursite.com/img/SSMserverAuto.png">
+<meta property="og:image" content="http://yoursite.com/img/SSM1.png">
+<meta property="og:image" content="http://yoursite.com/img/SSM2.png">
+<meta property="og:image" content="http://yoursite.com/img/SSM3.png">
+<meta property="og:image" content="http://yoursite.com/img/SSM4.png">
+<meta property="og:image" content="http://yoursite.com/img/SSM5.png">
+<meta property="og:image" content="http://yoursite.com/img/SSM6.png">
+<meta property="og:image" content="http://yoursite.com/img/SSM7.png">
+<meta property="og:updated_time" content="2021-02-14T13:09:56.774Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="simple-spring-memcached实践">
+<meta name="twitter:description" content="前段时间，让我学习一下SSM的缓存技术，在大概了解了之后我在项目里面尝试加入SSM，下面是我完成的几个步骤。 安装memcached服务器memcached的服务器网上都有的下载这里就不贴链接了，建议安装后将memcached服务设置为自动启动，同时，我的注册表MemcachedServer的ImagePath属性值设为 “D:\memcached\memcached.exe” -d runser">
+<meta name="twitter:image" content="http://yoursite.com/img/SSMshijian.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2015/09/02/simple-spring-memcached实践/">
+
+
+
+
+
+  <title>simple-spring-memcached实践 | Bbb's NoteBook</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Bbb's NoteBook</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">cherrish everytime</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/09/02/simple-spring-memcached实践/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="陈正荣">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Bbb's NoteBook">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">simple-spring-memcached实践</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-09-02T09:40:02+08:00">
+                2015-09-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>前段时间，让我学习一下SSM的缓存技术，在大概了解了之后我在项目里面尝试加入SSM，下面是我完成的几个步骤。</p>
+<h3 id="安装memcached服务器"><a href="#安装memcached服务器" class="headerlink" title="安装memcached服务器"></a>安装memcached服务器</h3><p>memcached的服务器网上都有的下载这里就不贴链接了，建议安装后将memcached服务设置为自动启动，同时，我的注册表MemcachedServer的ImagePath属性值设为<font color="red"> “D:\memcached\memcached.exe” -d runservice-1 127.0.0.1 -m 64 -p 12000</font>设置好后如图：<br><br><img src="/img/SSMshijian.png"></p>
+<h3 id="memcached服务器的基本操作"><a href="#memcached服务器的基本操作" class="headerlink" title="memcached服务器的基本操作"></a>memcached服务器的基本操作</h3><h4 id="首先"><a href="#首先" class="headerlink" title="首先"></a>首先</h4><p>首先保证你打开了系统的<font color="red">telnet服务</font>以及win+R-&gt;services.msc里的memcachedServer的自动启动，如下图:<br><br><img src="/img/SSMserverAuto.png"></p>
+<h4 id="cmd下的操作命令"><a href="#cmd下的操作命令" class="headerlink" title="cmd下的操作命令"></a>cmd下的操作命令</h4><p>cmd窗口下 telnet 127.0.0.1 11211打开memcached服务器,如果窗口进入黑屏，只有一个光标闪动就表明成功了(没有消息就是好事-。-)。</p>
+<h5 id="存储命令"><a href="#存储命令" class="headerlink" title="存储命令"></a>存储命令</h5><p>存储命令的格式:</p>
+<pre><code>&lt;command name&gt; &lt;key&gt; &lt;flags&gt; &lt;exptime&gt; &lt;bytes&gt;    
+&lt;data block&gt;    
+
+&lt;command name&gt;     set/add/replace
+&lt;key&gt;             查找关键字
+&lt;flags&gt;         客户机使用它存储关于键值对的额外信息
+&lt;exptime&gt;         该数据的存活时间，0表示永远
+&lt;bytes&gt;         存储字节数
+&lt;data block&gt;     存储的数据块（可直接理解为key-value结构中的value)    
+</code></pre><ol>
+<li>添加<br><img src="/img/SSM1.png"><br>这个set的命令在memcached中的使用频率极高。set命令不但可以简单添加，如果set的key已经存在，该命令可以更新该key所对应的原来的数据，也就是实现更新的作用。<br>可以通过“get 键名”的方式查看添加进去的记录：<br><img src="/img/SSM2.png"><br>类推，我们知道肯定有delete <name>命令。<br>至于add命令是只有在数据不存在时才能添加的，还有replace命令只有在数据存在时才能替换，这里就不一一列举了。<h5 id="读取命令"><a href="#读取命令" class="headerlink" title="读取命令"></a>读取命令</h5></name></li>
+<li>get<br>get命令的key可以表示一个或者多个键，键之间以空格隔开</li>
+<li>gets<br>gets命令比普通的get命令多返回了一个数字。这个数字可以检查数据是否发生改变。当key对应的数据改变时，这个多返回的数字也会改变。</li>
+<li>cas<br>cas即checked and set的意思<br>只有当最后一个参数和gets所获取的参数匹配时才能存储，否则返回“EXISTS”。<h5 id="状态命令"><a href="#状态命令" class="headerlink" title="状态命令"></a>状态命令</h5>这些命令是我最喜欢用的了。。。因为都可以查看全局资源。</li>
+<li>stats<br><img src="/img/SSM3.png"></li>
+<li>stats items<br><img src="/img/SSM4.png"><br>执行stats items，可以看到STATitems行，如果memcached存储内容很多，那么这里也会列出很多的STAT items行。</li>
+<li>stats cachedump slab_id limit_num<br><img src="/img/SSM5.png"><br>limit_num看起来好像是返回多少条记录，猜的一点不错， 不过0表示显示出所有记录，而n(n&gt;0)就表示显示n条记录，如果n超过该slab下的所有记录，则结果和0返回的结果一致。</li>
+</ol>
+<p>其他memcached的命令在这里就不一一赘述了，网上都能查到。</p>
+<h3 id="项目中的SSM实际应用"><a href="#项目中的SSM实际应用" class="headerlink" title="项目中的SSM实际应用"></a>项目中的SSM实际应用</h3><p>在项目中使用SSM除了有个memcached的服务器还不够，还需要相关的api，这里贴出我的网盘地址，可以下载参考。<a href="http://pan.baidu.com/s/1c09C5zU" target="_blank" rel="noopener">点我下载</a>提取码为kqfz<br>解压后将lib文件夹和dist文件夹里的jar文件复制到项目中，记得删除重复的低版本jar文件，不然会报错。<br>然后在applicationContext.xml文件中添加如下配置：</p>
+<pre><code> &lt;!-- ***********************  simple-spring-memcache ******************************* --&gt;
+&lt;!-- ssm 配置文件，主要用来加载组件核心的Advice，供程序调度使用；封装在 simple-spring-memcached-3.1.0.jar 文件中--&gt;
+&lt;import resource=&quot;simplesm-context.xml&quot; /&gt;
+&lt;!-- 让代理机制起到作用,simple-spring-memcached主要是基于AOP的代理  --&gt;
+&lt;aop:aspectj-autoproxy /&gt;    
+&lt;!-- com.google.code.ssm.CacheFactory是一个FactoryBean，会返回Cache（高速缓存）实体供Advice使用 --&gt;
+&lt;!-- FactoryBean解决的是如何创建无法直接通过new运算符创建的Bean，并注入到其他的bean中。也就是说FactoryBean是创建或者管理其他被注入和管理Bean的工厂Bean --&gt;
+&lt;bean name=&quot;defaultMemcachedClient&quot; class=&quot;com.google.code.ssm.CacheFactory&quot;&gt;
+    &lt;property name=&quot;cacheClientFactory&quot;&gt;
+        &lt;!-- xmemcached配置方法 --&gt;
+        &lt;bean name=&quot;cacheClientFactory&quot; class=&quot;com.google.code.ssm.providers.xmemcached.MemcacheClientFactoryImpl&quot; /&gt;
+        &lt;!--  spymemcached配置方法
+        &lt;bean name=&quot;cacheClientFactory&quot; class=&quot;com.google.code.ssm.providers.spymemcached.MemcacheClientFactoryImpl&quot; /&gt;
+        --&gt;
+    &lt;/property&gt;
+    &lt;!-- 定义了缓存节点的IP地址和端口号 --&gt;
+    &lt;property name=&quot;addressProvider&quot;&gt;
+        &lt;bean class=&quot;com.google.code.ssm.config.DefaultAddressProvider&quot;&gt;
+            &lt;property name=&quot;address&quot; value=&quot;127.0.0.1:11211&quot; /&gt;
+        &lt;/bean&gt;
+    &lt;/property&gt;
+    &lt;!-- 定义了缓存节点的查找方法 --&gt;
+    &lt;property name=&quot;configuration&quot;&gt;
+        &lt;bean class=&quot;com.google.code.ssm.providers.CacheConfiguration&quot;&gt;
+            &lt;property name=&quot;consistentHashing&quot; value=&quot;true&quot; /&gt;
+        &lt;/bean&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;
+&lt;bean class=&quot;com.google.code.ssm.Settings&quot;&gt;
+&lt;property name=&quot;order&quot; value=&quot;500&quot; /&gt;
+</code></pre><p>  <br>    <!-- ***********************  simple-spring-memcache ******************************* -->    </p>
+<p>接下来就是在代码中使用切面来实现你的缓存了yeah~<br>具体代码可以参考我前面写过的一篇文章。<br>这里有几点我遇到的问题提一下:<br>生成key如果对象方法里没有@cachemethod的话,会调用toString()方法。我一般重写toString（）方法来规定key的生成规则。<br>具体如下：</p>
+<p><img src="/img/SSM6.png"><br><img src="/img/SSM7.png"></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/SSM/" rel="tag"># SSM</a>
+          
+            <a href="/tags/缓存/" rel="tag"># 缓存</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/08/17/深入Simple-Spring-Memcached/" rel="next" title="初学Simple-Spring-Memcached">
+                <i class="fa fa-chevron-left"></i> 初学Simple-Spring-Memcached
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/09/08/了解JVM/" rel="prev" title="了解JVM">
+                了解JVM <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="/uploads/avatar.jpg" alt="陈正荣">
+          <p class="site-author-name" itemprop="name">陈正荣</p>
+           
+              <p class="site-description motion-element" itemprop="description">陈正荣的博客</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/ILovePing" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                    
+                      GitHub
+                    
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装memcached服务器"><span class="nav-number">1.</span> <span class="nav-text">安装memcached服务器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#memcached服务器的基本操作"><span class="nav-number">2.</span> <span class="nav-text">memcached服务器的基本操作</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#首先"><span class="nav-number">2.1.</span> <span class="nav-text">首先</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#cmd下的操作命令"><span class="nav-number">2.2.</span> <span class="nav-text">cmd下的操作命令</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#存储命令"><span class="nav-number">2.2.1.</span> <span class="nav-text">存储命令</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#读取命令"><span class="nav-number">2.2.2.</span> <span class="nav-text">读取命令</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#状态命令"><span class="nav-number">2.2.3.</span> <span class="nav-text">状态命令</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#项目中的SSM实际应用"><span class="nav-number">3.</span> <span class="nav-text">项目中的SSM实际应用</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">陈正荣</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Gemini
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
